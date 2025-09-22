@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 const Chat = ({ socket, user }) => {
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState('');
-    const [onlineUsers, setOnlineUsers] = useState([]);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -42,11 +41,6 @@ const Chat = ({ socket, user }) => {
             socket.off('user_left');
         };
     }, [socket, user]);
-
-    useEffect(() => {
-        // Scroll to bottom when new messages arrive
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
 
     const handleSubmit = (e) => {
         e.preventDefault();

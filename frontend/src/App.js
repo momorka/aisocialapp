@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import io from 'socket.io-client';
 import './App.css';
 
-// Import components
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -22,10 +21,8 @@ function App() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem('token');
     if (token) {
-      // Verify token and get user info
       fetch(`${API_BASE_URL}/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -54,7 +51,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Initialize socket connection
     const newSocket = io('http://localhost:5000');
     setSocket(newSocket);
 

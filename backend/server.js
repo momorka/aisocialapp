@@ -21,16 +21,13 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/socialapp';
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// MongoDB Schemas
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     username: { type: String, unique: true, sparse: true },
@@ -60,13 +57,11 @@ const pokeSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-// Models
 const User = mongoose.model('User', userSchema);
 const Post = mongoose.model('Post', postSchema);
 const Comment = mongoose.model('Comment', commentSchema);
 const Poke = mongoose.model('Poke', pokeSchema);
 
-// Authentication middleware
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -82,13 +77,13 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Email validation function
+// email validation function
 const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 };
 
-// AI content generation (mock function)
+// AI content generation
 const generatePostContent = async (topic, mood) => {
     const moodAdjectives = {
         happy: ['joyful', 'exciting', 'wonderful', 'amazing'],
@@ -104,9 +99,7 @@ const generatePostContent = async (topic, mood) => {
     return `This is a ${randomAdj} post about ${topic}. The mood here is ${mood}, and there's so much to explore about this topic. ${topic} has always been fascinating, and when viewed through a ${mood} lens, it becomes even more compelling. What are your thoughts on ${topic}?`;
 };
 
-// Routes
-
-// Register
+// register
 app.post('/api/auth/register', [
     body('email').isEmail().withMessage('Please provide a valid email'),
     body('password').isLength({ min: 6, max: 20 }).withMessage('Password must be between 6-20 characters'),
@@ -125,16 +118,15 @@ app.post('/api/auth/register', [
     const { email, password, username } = req.body;
 
     try {
-        // Check if user already exists
+        // does user already exist
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user
+        // create user
         const user = new User({
             email,
             username: username || undefined,
@@ -156,7 +148,7 @@ app.post('/api/auth/register', [
     }
 });
 
-// Login
+// login
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -185,7 +177,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// Get all posts (public)
+// all posts
 app.get('/api/posts', async (req, res) => {
     try {
         const posts = await Post.find()
@@ -210,7 +202,7 @@ app.get('/api/posts', async (req, res) => {
     }
 });
 
-// Get all users (public)
+// all users
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find({}, 'email username createdAt');
@@ -226,7 +218,7 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-// Get single post with comments (public)
+// single post
 app.get('/api/posts/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id)
@@ -268,7 +260,7 @@ app.get('/api/posts/:id', async (req, res) => {
     }
 });
 
-// Add comment to post (private)
+// add comment
 app.post('/api/posts/:id/comments', authenticateToken, async (req, res) => {
     const { content } = req.body;
 
@@ -290,7 +282,7 @@ app.post('/api/posts/:id/comments', authenticateToken, async (req, res) => {
     }
 });
 
-// Get single user (public)
+// single user
 app.get('/api/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id, 'email username createdAt');
@@ -311,7 +303,7 @@ app.get('/api/users/:id', async (req, res) => {
     }
 });
 
-// Poke user (private)
+// poke user
 app.post('/api/users/:id/poke', authenticateToken, async (req, res) => {
     const toUserId = req.params.id;
     const fromUserId = req.user.userId;
@@ -328,7 +320,6 @@ app.post('/api/users/:id/poke', authenticateToken, async (req, res) => {
 
         await poke.save();
 
-        // Emit socket event for real-time notification
         io.emit('poke', { fromUserId, toUserId });
 
         res.status(201).json({ message: 'Poke sent successfully' });
@@ -337,7 +328,7 @@ app.post('/api/users/:id/poke', authenticateToken, async (req, res) => {
     }
 });
 
-// Get user profile (private)
+// my profile
 app.get('/api/profile', authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId, 'email username createdAt');
@@ -353,7 +344,7 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
     }
 });
 
-// Update username (private)
+// update my username
 app.put('/api/profile/username', authenticateToken, async (req, res) => {
     const { username } = req.body;
 
@@ -362,7 +353,7 @@ app.put('/api/profile/username', authenticateToken, async (req, res) => {
     }
 
     try {
-        // Check if username is already taken
+        // is username taken
         const existingUser = await User.findOne({
             username: username.trim(),
             _id: { $ne: req.user.userId }
@@ -379,7 +370,7 @@ app.put('/api/profile/username', authenticateToken, async (req, res) => {
     }
 });
 
-// Get pokes history (private)
+// pokes history
 app.get('/api/profile/pokes', authenticateToken, async (req, res) => {
     try {
         const pokes = await Poke.find({ toUserId: req.user.userId })
@@ -399,7 +390,7 @@ app.get('/api/profile/pokes', authenticateToken, async (req, res) => {
     }
 });
 
-// Create post (private)
+// create post
 app.post('/api/posts', authenticateToken, async (req, res) => {
     const { topic, mood, image_url } = req.body;
 
@@ -425,7 +416,7 @@ app.post('/api/posts', authenticateToken, async (req, res) => {
     }
 });
 
-// Socket.io for real-time chat
+// real-time chat
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 

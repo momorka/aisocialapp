@@ -11,14 +11,12 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch posts
                 const postsResponse = await fetch(`${API_BASE_URL}/posts`);
                 if (!postsResponse.ok) {
                     throw new Error('Failed to fetch posts');
                 }
                 const postsData = await postsResponse.json();
 
-                // Fetch users
                 const usersResponse = await fetch(`${API_BASE_URL}/users`);
                 if (!usersResponse.ok) {
                     throw new Error('Failed to fetch users');

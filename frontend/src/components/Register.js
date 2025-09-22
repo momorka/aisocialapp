@@ -23,18 +23,15 @@ const Register = ({ login }) => {
     const validateForm = () => {
         const newErrors = [];
 
-        // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
             newErrors.push('Please provide a valid email address');
         }
 
-        // Password validation
         if (formData.password.length < 6 || formData.password.length > 20) {
             newErrors.push('Password must be between 6-20 characters');
         }
 
-        // Confirm password validation
         if (formData.password !== formData.confirmPassword) {
             newErrors.push('Passwords do not match');
         }

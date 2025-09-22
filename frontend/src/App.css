@@ -155,7 +155,6 @@ body {
   margin-top: 0.25rem;
 }
 
-/* Homepage */
 .home-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -179,7 +178,7 @@ body {
   }
 }
 
-/* Posts */
+/* posts */
 .posts-section h3,
 .users-section h3 {
   color: #333;
@@ -366,7 +365,7 @@ body {
   font-size: 0.875rem;
 }
 
-/* User detail page */
+/* user detail page */
 .user-detail {
   background: white;
   border-radius: 8px;
@@ -404,7 +403,7 @@ body {
   text-align: center;
 }
 
-/* Chat page */
+/* chat page */
 .chat-container {
   height: 70vh;
   background: white;
